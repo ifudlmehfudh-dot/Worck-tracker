@@ -1,0 +1,2022 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متتبع يوميات العمل والأهداف والرزنامة - حتى 10 سبتمبر 2027</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Cairo', 'Tajawal', 'Inter', 'system-ui', 'sans-serif'],
+        },
+        borderRadius: {
+          '2xl': '16px',
+        }
+      }
+    }
+  }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * {
+    box-sizing: border-box;
+    font-family: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.4);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.7);
+  }
+  /* Shimmer animation for active goal progress */
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  .progress-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  .fire-pulse {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200 min-h-screen p-3 sm:p-6">
+
+<!-- Celebratory Confetti Canvas -->
+<canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
+
+<div class="max-w-7xl mx-auto space-y-6">
+
+  <!-- Top Navigation & Header -->
+  <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3.5">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex items-center justify-center shadow-md shadow-emerald-600/20 shrink-0">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+      </div>
+      <div>
+        <h1 id="appTitle" class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          متتبع يوميات العمل والأهداف والرزنامة
+        </h1>
+        <p id="lblRangeInfo" class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5 tabular-nums">
+          الفترة: 2026-11-23 إلى 2027-09-10
+        </p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
+      <!-- Dark/Light Theme Toggle -->
+      <button onclick="toggleTheme()" id="themeBtn" aria-label="Toggle Theme"
+        class="p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all shadow-xs">
+        <svg id="sunIcon" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+        <svg id="moonIcon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        </svg>
+      </button>
+
+      <!-- Language Toggle -->
+      <button id="langBtn" onclick="toggleLang()"
+        class="px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-xs">
+        Français
+      </button>
+
+      <!-- Export CSV -->
+      <button onclick="exportCSV()" id="exportBtn"
+        class="px-4 py-2.5 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm flex items-center gap-2 transition-all shadow-sm shadow-emerald-700/20">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        <span id="exportBtnText">تصدير CSV</span>
+      </button>
+
+      <!-- Reset Button -->
+      <button onclick="openResetModal()" id="resetBtn"
+        class="px-3.5 py-2.5 rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 font-bold text-sm flex items-center gap-1.5 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+        <span id="resetBtnText">إعادة ضبط</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Motivational Hero Banner & Streak Tracker -->
+  <section class="relative overflow-hidden rounded-2xl bg-gradient-to-l from-emerald-900 via-teal-800 to-slate-900 text-white p-5 sm:p-6 shadow-lg border border-emerald-700/40">
+    <div class="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-emerald-400/10 blur-2xl pointer-events-none"></div>
+    <div class="absolute -bottom-20 right-10 w-56 h-56 rounded-full bg-amber-400/10 blur-2xl pointer-events-none"></div>
+
+    <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+      <!-- Dynamic Coaching Message & Rotating Quote -->
+      <div class="lg:col-span-8 space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/15 text-xs font-bold text-amber-300">
+          <span>✨</span>
+          <span id="coachTitle">دفعة تحفيزية ذكية</span>
+        </div>
+        <h2 id="coachDynamicMsg" class="text-base sm:text-xl font-extrabold leading-snug text-white">
+          كل يوم عمل يقرّبك خطوة حقيقية من أهدافك!
+        </h2>
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/10">
+          <p id="quoteText" class="text-xs sm:text-sm italic text-emerald-100/90 flex-1">
+            "النجاح هو مجموع مجهودات صغيرة تتكرر يوماً بعد يوم."
+          </p>
+          <button type="button" onclick="nextQuote()" id="newQuoteBtn"
+            class="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 border border-white/15">
+            <span>🔄</span>
+            <span id="newQuoteBtnText">عبارة تحفيزية جديدة</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Streak & Consistency Card -->
+      <div class="lg:col-span-4 grid grid-cols-2 gap-3 bg-slate-950/35 backdrop-blur-sm p-3.5 rounded-2xl border border-white/10">
+        <div class="text-center p-2.5 rounded-xl bg-white/5 border border-white/10">
+          <div class="text-2xl fire-pulse mb-0.5">🔥</div>
+          <div id="valCurrentStreak" class="text-xl sm:text-2xl font-black text-amber-400 tabular-nums">0</div>
+          <div id="lblCurrentStreak" class="text-[11px] font-bold text-emerald-100 mt-0.5">سلسلة الالتزام الحالية</div>
+        </div>
+        <div class="text-center p-2.5 rounded-xl bg-white/5 border border-white/10">
+          <div class="text-2xl mb-0.5">🏆</div>
+          <div id="valBestStreak" class="text-xl sm:text-2xl font-black text-teal-300 tabular-nums">0</div>
+          <div id="lblBestStreak" class="text-[11px] font-bold text-emerald-100 mt-0.5">أطول سلسلة إنجاز</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 Statistics Cards -->
+  <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+    <!-- Base Work Earnings -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center gap-3.5">
+      <div class="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div>
+        <div id="lblGross" class="text-xs font-semibold text-slate-500 dark:text-slate-400">إجمالي الأجر الأساسي</div>
+        <div id="valGross" class="text-lg font-extrabold text-slate-900 dark:text-white tabular-nums mt-0.5">0 دج</div>
+        <div id="valRateSub" class="text-[11px] font-semibold text-slate-400 tabular-nums">2,000 دج / يوم</div>
+      </div>
+    </div>
+
+    <!-- Total Bonuses / Additions -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center gap-3.5">
+      <div class="w-11 h-11 rounded-2xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+        </svg>
+      </div>
+      <div>
+        <div id="lblBonuses" class="text-xs font-semibold text-slate-500 dark:text-slate-400">إجمالي الزيادات</div>
+        <div id="valBonuses" class="text-lg font-extrabold text-teal-600 dark:text-teal-400 tabular-nums mt-0.5">+0 دج</div>
+      </div>
+    </div>
+
+    <!-- Total General Deductions -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center gap-3.5">
+      <div class="w-11 h-11 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div>
+        <div id="lblDeductions" class="text-xs font-semibold text-slate-500 dark:text-slate-400">إجمالي الخصومات العامة</div>
+        <div id="valDeductions" class="text-lg font-extrabold text-rose-600 dark:text-rose-400 tabular-nums mt-0.5">-0 دج</div>
+      </div>
+    </div>
+
+    <!-- Net Income (Highlighted Hero Card) -->
+    <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl p-4 shadow-md shadow-emerald-700/20 flex items-center gap-3.5 sm:col-span-2 lg:col-span-1">
+      <div class="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur-xs text-white flex items-center justify-center shrink-0">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+        </svg>
+      </div>
+      <div>
+        <div id="lblNet" class="text-xs font-semibold text-emerald-100">الصافي المحصل</div>
+        <div id="valNet" class="text-xl font-black text-white tabular-nums mt-0.5">0 دج</div>
+      </div>
+    </div>
+
+    <!-- Completed Days -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center gap-3.5">
+      <div class="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div class="min-w-0 flex-1">
+        <div id="lblDays" class="text-xs font-semibold text-slate-500 dark:text-slate-400">ملخص الأيام (منجز / المتاح)</div>
+        <div id="valDays" class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tabular-nums mt-0.5">0 / 0</div>
+        <div id="valDaysSub" class="text-[11px] font-bold text-slate-500 dark:text-slate-400 tabular-nums mt-0.5 truncate"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Priority Goals Cards -->
+  <section id="goalsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-4"></section>
+
+  <!-- Achievement Badges Shelf -->
+  <section class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2.5 h-6 rounded-full bg-amber-500"></span>
+        <div>
+          <h2 id="badgesTitle" class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
+            لوحة الأوسمة والإنجازات
+          </h2>
+          <p id="badgesSub" class="text-xs text-slate-500 dark:text-slate-400">
+            استمر في العمل والالتزام لفتح جميع الأوسمة التحفيزية
+          </p>
+        </div>
+      </div>
+      <span id="badgesProgressBadge" class="px-3 py-1 rounded-full text-xs font-extrabold bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 tabular-nums">
+        0 / 8
+      </span>
+    </div>
+    <div id="badgesGrid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5"></div>
+  </section>
+
+  <!-- Standalone General Deductions Section -->
+  <section id="deductionsSection" class="bg-white dark:bg-slate-900 border border-rose-200/80 dark:border-rose-900/50 rounded-2xl p-4 sm:p-5 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2.5 h-6 rounded-full bg-rose-600"></span>
+        <div>
+          <h2 id="dedSectionTitle" class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
+            سجل الخصومات العامة (مستقلة عن الأيام)
+          </h2>
+          <p id="dedSectionSub" class="text-xs text-slate-500 dark:text-slate-400">
+            أضف أي خصم أو سلفة أو مصاريف عامة ليتم خصمها مباشرة من الصافي الإجمالي
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 bg-rose-50 dark:bg-rose-950/50 border border-rose-200/80 dark:border-rose-800/60 px-3.5 py-2 rounded-xl">
+        <span id="dedBadgeLabel" class="text-xs font-bold text-rose-700 dark:text-rose-300">إجمالي الخصومات:</span>
+        <span id="dedSectionTotal" class="text-sm sm:text-base font-black text-rose-600 dark:text-rose-400 tabular-nums">0 دج</span>
+      </div>
+    </div>
+
+    <!-- Add Deduction Form -->
+    <form onsubmit="addGeneralDeduction(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 mb-4">
+      <div class="sm:col-span-3">
+        <input type="number" id="newDedAmount" min="1" step="50" required placeholder="المبلغ (دج)..."
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-bold text-rose-600 dark:text-rose-400 placeholder-slate-400 tabular-nums focus:outline-none focus:border-rose-500">
+      </div>
+      <div class="sm:col-span-5">
+        <input type="text" id="newDedReason" required placeholder="سبب الخصم (مثال: سلفة، مصاريف، غرامة...)"
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-rose-500">
+      </div>
+      <div class="sm:col-span-2">
+        <input type="date" id="newDedDate" required
+          class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-700 dark:text-slate-200 tabular-nums focus:outline-none focus:border-rose-500">
+      </div>
+      <div class="sm:col-span-2">
+        <button type="submit" id="addDedBtn"
+          class="w-full h-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          <span id="addDedBtnText">إضافة خصم</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- General Deductions List -->
+    <div id="generalDeductionsList" class="space-y-2 max-h-56 overflow-y-auto"></div>
+  </section>
+
+  <!-- Controls Bar: View Tabs & Skip Friday Option -->
+  <section class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
+    <!-- View Mode Tabs -->
+    <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl">
+      <button onclick="setViewMode('both')" id="tabBoth"
+        class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs">
+        عرض الكل
+      </button>
+      <button onclick="setViewMode('calendar')" id="tabCalendar"
+        class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+        الرزنامة فقط
+      </button>
+      <button onclick="setViewMode('table')" id="tabTable"
+        class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+        الجدول فقط
+      </button>
+      <button onclick="setViewMode('deductions')" id="tabDeductions"
+        class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+        الخصومات فقط
+      </button>
+    </div>
+
+    <!-- Skip Friday Switch -->
+    <label class="flex items-center gap-3 cursor-pointer select-none">
+      <div class="relative inline-flex items-center">
+        <input type="checkbox" id="skipFriday" onchange="toggleSkipFriday()" class="sr-only peer">
+        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+      </div>
+      <span id="lblSkipFriday" class="text-sm font-bold text-slate-700 dark:text-slate-200">
+        تخطي يوم الجمعة تلقائياً (عطلة أسبوعية)
+      </span>
+    </label>
+  </section>
+
+  <!-- Monthly Calendar Section -->
+  <section id="calendarSection" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <div class="flex items-center gap-2.5">
+        <span class="w-2.5 h-6 rounded-full bg-emerald-600"></span>
+        <h2 id="calMonthTitle" class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">نوفمبر 2026</h2>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="changeMonth(-1)" id="prevMonthBtn"
+          class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs sm:text-sm font-bold transition-colors">
+          ◀ الشهر السابق
+        </button>
+        <button onclick="jumpToTodayMonth()" id="todayMonthBtn"
+          class="px-3 py-2 rounded-xl border border-emerald-200 dark:border-emerald-800/70 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-xs sm:text-sm font-bold transition-colors">
+          الشهر الحالي
+        </button>
+        <button onclick="jumpToStartMonth()" id="startMonthBtn"
+          class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs sm:text-sm font-bold transition-colors">
+          بداية الفترة
+        </button>
+        <button onclick="changeMonth(1)" id="nextMonthBtn"
+          class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs sm:text-sm font-bold transition-colors">
+          الشهر التالي ▶
+        </button>
+      </div>
+    </div>
+
+    <!-- Calendar Legend -->
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
+        <span class="flex items-center gap-1.5">
+          <span class="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span>
+          <span id="legWorked">يوم عمل منجز</span>
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-3 h-3 rounded-sm bg-teal-500 ring-2 ring-amber-400/80 inline-block"></span>
+          <span id="legWorkedBonus">يوم عمل مع زيادة</span>
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-3 h-3 rounded-sm bg-rose-500 inline-block"></span>
+          <span id="legAbsent">يوم لم أعمل فيه</span>
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-3 h-3 rounded-sm bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 inline-block"></span>
+          <span id="legUnworked">غير مسجل بعد</span>
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-3 h-3 rounded-sm bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 inline-block"></span>
+          <span id="legOutRange">خارج الفترة</span>
+        </span>
+      </div>
+      <span id="calCycleHint" class="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50/80 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg">
+        انقر على اليوم للتبديل: غير مسجل ← تم العمل ← لم أعمل
+      </span>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 sm:gap-2"></div>
+  </section>
+
+  <!-- Daily Logs Table Section -->
+  <section id="tableSection" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
+    <!-- Filter & Search Toolbar -->
+    <div class="p-4 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/60 dark:bg-slate-900">
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Status Filter -->
+        <select id="filterStatus" onchange="render()"
+          class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-emerald-500">
+          <option value="all" id="optAll">جميع الأيام</option>
+          <option value="done" id="optDone">الأيام المنجزة فقط</option>
+          <option value="absent" id="optAbsent">أيام لم أعمل فيها</option>
+          <option value="undone" id="optUndone">غير المسجلة بعد</option>
+          <option value="bonus" id="optBonus">الأيام ذات الزيادات</option>
+        </select>
+
+        <!-- Month Filter -->
+        <select id="filterMonth" onchange="render()"
+          class="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-emerald-500">
+          <option value="all" id="optAllMonths">كل الأشهر</option>
+        </select>
+
+        <!-- Jump to Today Row -->
+        <button onclick="scrollToTodayRow()" id="scrollTodayBtn"
+          class="px-3 py-2 rounded-xl border border-emerald-200 dark:border-emerald-800/70 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-xs sm:text-sm font-bold transition-colors">
+          الانتقال لليوم
+        </button>
+
+        <!-- Bulk Mark Past Unrecorded Days as Absent -->
+        <button onclick="openBulkAbsentModal()" id="bulkAbsentBtn"
+          class="px-3 py-2 rounded-xl border border-rose-200 dark:border-rose-800/70 bg-rose-50/80 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-xs sm:text-sm font-bold transition-colors flex items-center gap-1.5">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span id="bulkAbsentBtnText">تحديد الأيام الماضية غير المسجلة كـ "لم أعمل"</span>
+        </button>
+      </div>
+
+      <!-- Search Input -->
+      <div class="relative w-full sm:w-64">
+        <input type="text" id="searchInput" oninput="render()" placeholder="بحث بالتاريخ أو الملاحظة..."
+          class="w-full ps-9 pe-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500">
+        <svg class="w-4 h-4 text-slate-400 absolute top-2.5 start-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Scrollable Table Container -->
+    <div id="tableScrollContainer" class="overflow-x-auto max-h-[68vh]">
+      <table class="w-full border-collapse min-w-[850px] text-sm">
+        <thead class="sticky top-0 z-10 bg-slate-100/90 dark:bg-slate-800/90 backdrop-blur-md text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
+          <tr>
+            <th id="thNum" class="py-3.5 px-3 text-start font-bold w-14">#</th>
+            <th id="thDay" class="py-3.5 px-3 text-start font-bold">اليوم</th>
+            <th id="thDate" class="py-3.5 px-3 text-start font-bold">التاريخ</th>
+            <th id="thStatus" class="py-3.5 px-3 text-start font-bold">حالة العمل</th>
+            <th id="thBonus" class="py-3.5 px-3 text-start font-bold">الزيادات</th>
+            <th id="thNetDay" class="py-3.5 px-3 text-start font-bold">مدخول اليوم</th>
+            <th id="thCumulative" class="py-3.5 px-3 text-start font-bold">المجموع التراكمي</th>
+            <th id="thNote" class="py-3.5 px-3 text-start font-bold">ملاحظات</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody" class="divide-y divide-slate-100 dark:divide-slate-800/80"></tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<!-- Custom Reset Confirmation Modal -->
+<div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
+    <div class="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/70 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-4">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+    </div>
+    <h3 id="modalTitle" class="text-lg font-extrabold text-slate-900 dark:text-white mb-2">تأكيد إعادة الضبط</h3>
+    <p id="modalBody" class="text-sm text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+      هل أنت متأكد من مسح جميع البيانات والزيادات والخصومات المسجلة؟
+    </p>
+    <div class="flex justify-end gap-3">
+      <button type="button" onclick="closeResetModal()" id="modalCancelBtn"
+        class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+        إلغاء
+      </button>
+      <button type="button" onclick="confirmReset()" id="modalConfirmBtn"
+        class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm transition-colors shadow-sm">
+        نعم، مسح الكل
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Absent Confirmation Modal -->
+<div id="bulkAbsentModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 backdrop-blur-xs p-4">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
+    <div class="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/70 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+      </svg>
+    </div>
+    <h3 id="bulkModalTitle" class="text-lg font-extrabold text-slate-900 dark:text-white mb-2">تحديد الأيام الماضية كـ "لم أعمل"</h3>
+    <p id="bulkModalBody" class="text-sm text-slate-600 dark:text-slate-400 mb-6 leading-relaxed"></p>
+    <div class="flex justify-end gap-3">
+      <button type="button" onclick="closeBulkAbsentModal()" id="bulkModalCancelBtn"
+        class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+        إلغاء
+      </button>
+      <button type="button" onclick="confirmBulkAbsent()" id="bulkModalConfirmBtn"
+        class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm transition-colors shadow-sm">
+        تأكيد التحديث
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden bg-slate-900 dark:bg-emerald-600 text-white text-sm font-bold px-5 py-3 rounded-2xl shadow-xl border border-slate-700/50 dark:border-emerald-500"></div>
+
+<script>
+  const DAILY_RATE = 2000;
+  const START_DATE = new Date(2026, 10, 23); // 2026-11-23
+  const END_DATE = new Date(2027, 8, 10);    // 2027-09-10
+
+  // Priority order: Goal 1 -> Goal 2 -> Goal 3
+  const GOALS = [
+    {
+      id: 'brousi',
+      target: 100000,
+      ar: 'الهدف الأول: brousi',
+      fr: 'Objectif 1 : brousi',
+      priorityAr: 'أولوية 1',
+      priorityFr: 'Priorité 1',
+      accent: 'emerald'
+    },
+    {
+      id: 'iphone',
+      target: 150000,
+      ar: 'الهدف الثاني: iphone 16 pink',
+      fr: 'Objectif 2 : iphone 16 pink',
+      priorityAr: 'أولوية 2',
+      priorityFr: 'Priorité 2',
+      accent: 'pink'
+    },
+    {
+      id: 'tepyicha',
+      target: 100000,
+      ar: 'الهدف الثالث: tepyicha',
+      fr: 'Objectif 3 : tepyicha',
+      priorityAr: 'أولوية 3',
+      priorityFr: 'Priorité 3',
+      accent: 'teal'
+    }
+  ];
+
+  const i18n = {
+    ar: {
+      dir: 'rtl',
+      langBtn: 'Français',
+      title: 'متتبع يوميات العمل والأهداف والرزنامة',
+      exportBtn: 'تصدير CSV',
+      resetBtn: 'إعادة ضبط',
+      lblGross: 'إجمالي الأجر الأساسي',
+      valRateSub: '2,000 دج / يوم',
+      lblBonuses: 'إجمالي الزيادات',
+      lblDeductions: 'إجمالي الخصومات العامة',
+      lblNet: 'الصافي المحصل',
+      lblDays: 'ملخص الأيام (منجز / المتاح)',
+      daysSubFormat: 'لم أعمل: {absent} • متبقي: {remaining}',
+      dedSectionTitle: 'سجل الخصومات العامة (مستقلة عن الأيام)',
+      dedSectionSub: 'أضف أي خصم أو سلفة أو مصاريف عامة ليتم خصمها مباشرة من الصافي الإجمالي',
+      dedBadgeLabel: 'إجمالي الخصومات:',
+      newDedAmountPh: 'المبلغ (دج)...',
+      newDedReasonPh: 'سبب الخصم (سلفة، مصاريف، غرامة...)',
+      addDedBtn: 'إضافة خصم',
+      noDeductionsMsg: 'لا توجد خصومات عامة مسجلة حالياً.',
+      deleteDedTitle: 'حذف الخصم',
+      lblSkipFriday: 'تخطي يوم الجمعة تلقائياً (عطلة أسبوعية)',
+      lblRangeInfo: 'الفترة: 2026-11-23 إلى 2027-09-10',
+      tabBoth: 'عرض الكل',
+      tabCalendar: 'الرزنامة فقط',
+      tabTable: 'الجدول فقط',
+      tabDeductions: 'الخصومات فقط',
+      prevMonth: '◀ السابق',
+      nextMonth: 'التالي ▶',
+      todayMonth: 'الشهر الحالي',
+      startMonth: 'بداية الفترة',
+      scrollToday: 'الانتقال لليوم',
+      bulkAbsentBtn: 'تحديد الأيام الماضية غير المسجلة كـ "لم أعمل"',
+      optAll: 'جميع الأيام',
+      optDone: 'الأيام المنجزة فقط',
+      optAbsent: 'أيام لم أعمل فيها',
+      optUndone: 'غير المسجلة بعد',
+      optBonus: 'الأيام ذات الزيادات',
+      optAllMonths: 'كل الأشهر',
+      searchPlaceholder: 'بحث بالتاريخ أو الملاحظة...',
+      legWorked: 'يوم عمل منجز',
+      legWorkedBonus: 'يوم عمل مع زيادة',
+      legAbsent: 'يوم لم أعمل فيه',
+      legUnworked: 'غير مسجل بعد',
+      legOutRange: 'خارج الفترة',
+      calCycleHint: 'انقر على اليوم للتبديل: غير مسجل ← تم العمل ← لم أعمل',
+      thNum: '#',
+      thDay: 'اليوم',
+      thDate: 'التاريخ',
+      thStatus: 'حالة العمل',
+      thBonus: 'الزيادات',
+      thNetDay: 'مدخول اليوم',
+      thCumulative: 'المجموع التراكمي',
+      thNote: 'ملاحظات',
+      btnMark: '✓ تم العمل',
+      btnDone: '✓ تم العمل',
+      btnAbsent: '✕ لم أعمل',
+      statusCsvWorked: 'تم العمل',
+      statusCsvAbsent: 'لم أعمل',
+      statusCsvNone: 'غير مسجل',
+      csvDedHeader: '--- سجل الخصومات العامة المستقلة ---',
+      csvDedCols: ['التاريخ', 'السبب / البيان', 'المبلغ (دج)'],
+      csvSummaryHeader: '--- الملخص المالي الإجمالي ---',
+      notePlaceholder: 'أضف ملاحظة (مثلاً: ساعات إضافية، عطلة...)',
+      curr: 'دج',
+      daysShort: ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'],
+      days: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
+      months: ['جانفي', 'فيفري', 'مارس', 'أفريل', 'ماي', 'جوان', 'جويلية', 'أوت', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+      modalTitle: 'تأكيد إعادة الضبط',
+      confirmReset: 'هل أنت متأكد من مسح جميع البيانات والزيادات والخصومات العامة المسجلة؟ لا يمكن التراجع عن هذه العملية.',
+      modalCancel: 'إلغاء',
+      modalConfirm: 'نعم، مسح الكل',
+      bulkModalTitle: 'تحديد الأيام الماضية كـ "لم أعمل"',
+      bulkModalBodyCount: 'سيتم تحديد {count} يوم من الأيام الماضية غير المسجلة (حتى اليوم) كـ "لم أعمل". هل تريد المتابعة؟',
+      bulkModalConfirm: 'تأكيد التحديث',
+      toastNoPastUnrecorded: 'لا توجد أيام ماضية غير مسجلة لتحديثها',
+      toastBulkUpdated: 'تم تحديث {count} يوم كـ "لم أعمل"',
+      toastDedAdded: 'تمت إضافة الخصم العام بنجاح',
+      toastDedDeleted: 'تم حذف الخصم',
+      toastReset: 'تمت إعادة ضبط جميع البيانات بنجاح',
+      toastExport: 'تم تصدير ملف CSV بنجاح',
+      toastTodayNotFound: 'تاريخ اليوم خارج نطاق الفترة أو مخفي بالتصفية',
+      goalCollected: 'المحقق',
+      goalRemaining: 'المتبقي',
+      goalDaysNeeded: 'متبقي حوالي {days} يوم عمل',
+      goalEstDate: 'التاريخ المتوقع: {date}',
+      goalUnlockedMsg: '🎉 تم تحقيق الهدف بالكامل!',
+      coachTitle: 'دفعة تحفيزية ذكية',
+      newQuoteBtn: 'عبارة تحفيزية جديدة',
+      lblCurrentStreak: 'سلسلة الالتزام الحالية (يوم)',
+      lblBestStreak: 'أطول سلسلة إنجاز (يوم)',
+      coachStart: '🚀 رحلة الألف ميل تبدأ بيوم واحد! سجّل أول يوم عمل اليوم وابدأ جمع أهدافك.',
+      coachNearGoal: '🔥 رائع جداً! لم يتبقَّ سوى {rem} دج (حوالي {days} يوم عمل) لفتح "{goal}"!',
+      coachStreak: '⚡ أنت مشتعل حماساً! سلسلة التزام {streak} أيام متتالية — واصل هذا الزخم الرائع!',
+      coachAllDone: '👑 إنجاز أسطوري! لقد حققت جميع أهدافك بالكامل وصنعت المستحيل!',
+      badgesTitle: 'لوحة الأوسمة والإنجازات',
+      badgesSub: 'استمر في العمل والالتزام لفتح جميع الأوسمة التحفيزية',
+      badgeUnlocked: 'مفتوح ✓',
+      badgeLocked: 'مقفل',
+      toastMilestone: '🎉 إنجاز جديد! وصلت إلى {pct}% من هدف {goal}!',
+      toastStreakMilestone: '🔥 بطل الالتزام! حققت سلسلة {streak} أيام عمل متتالية!',
+      toastWorkedBoost: '💪 أحسنت! +2,000 دج أُضيفت لرصيد أحلامك!',
+      statusCompleted: 'مكتمل ✓',
+      statusActive: 'قيد التقدم',
+      statusWaiting: 'في الانتظار',
+      workedBadge: 'منجز',
+      absentBadge: 'لم أعمل',
+      absentCalSub: 'عطلة / غياب',
+      fridayBadge: 'جمعة',
+      todayBadge: 'اليوم',
+      noResults: 'لا توجد أيام مطابقة لخيارات البحث أو التصفية الحالية.'
+    },
+    fr: {
+      dir: 'ltr',
+      langBtn: 'العربية',
+      title: 'Suivi Travail, Objectifs & Calendrier',
+      exportBtn: 'Exporter CSV',
+      resetBtn: 'Réinitialiser',
+      lblGross: 'Salaire de Base Total',
+      valRateSub: '2 000 DZD / jour',
+      lblBonuses: 'Total Suppléments / Bonus',
+      lblDeductions: 'Total Déductions Générales',
+      lblNet: 'Net Gagné',
+      lblDays: 'Bilan Jours (Faits / Total)',
+      daysSubFormat: 'Non travaillés : {absent} • Restants : {remaining}',
+      dedSectionTitle: 'Registre des Déductions Générales (Indépendantes)',
+      dedSectionSub: 'Ajoutez toute avance, dépense ou déduction générale à soustraire du total net',
+      dedBadgeLabel: 'Total Déductions :',
+      newDedAmountPh: 'Montant (DZD)...',
+      newDedReasonPh: 'Motif (avance, dépense, retenue...)',
+      addDedBtn: 'Ajouter',
+      noDeductionsMsg: 'Aucune déduction générale enregistrée.',
+      deleteDedTitle: 'Supprimer',
+      lblSkipFriday: 'Ignorer automatiquement le vendredi',
+      lblRangeInfo: 'Période : 2026-11-23 au 2027-09-10',
+      tabBoth: 'Tout afficher',
+      tabCalendar: 'Calendrier seul',
+      tabTable: 'Tableau seul',
+      tabDeductions: 'Déductions seules',
+      prevMonth: '◀ Préc.',
+      nextMonth: 'Suiv. ▶',
+      todayMonth: 'Mois actuel',
+      startMonth: 'Début période',
+      scrollToday: "Aller à aujourd'hui",
+      bulkAbsentBtn: 'Marquer les jours passés non saisis "Non travaillé"',
+      optAll: 'Tous les jours',
+      optDone: 'Jours travaillés uniquement',
+      optAbsent: 'Jours non travaillés',
+      optUndone: 'Non enregistrés',
+      optBonus: 'Jours avec suppléments',
+      optAllMonths: 'Tous les mois',
+      searchPlaceholder: 'Rechercher date ou note...',
+      legWorked: 'Jour travaillé',
+      legWorkedBonus: 'Travaillé avec supplément',
+      legAbsent: 'Jour non travaillé',
+      legUnworked: 'Non enregistré',
+      legOutRange: 'Hors période',
+      calCycleHint: 'Cliquer pour alterner : Non enregistré → Travaillé → Non travaillé',
+      thNum: '#',
+      thDay: 'Jour',
+      thDate: 'Date',
+      thStatus: 'Statut',
+      thBonus: 'Suppléments',
+      thNetDay: 'Gain du Jour',
+      thCumulative: 'Cumul Brut+Bonus',
+      thNote: 'Notes',
+      btnMark: '✓ Travaillé',
+      btnDone: '✓ Travaillé',
+      btnAbsent: '✕ Non travaillé',
+      statusCsvWorked: 'Travaillé',
+      statusCsvAbsent: 'Non travaillé',
+      statusCsvNone: 'Non enregistré',
+      csvDedHeader: '--- Déductions Générales Indépendantes ---',
+      csvDedCols: ['Date', 'Motif / Description', 'Montant (DZD)'],
+      csvSummaryHeader: '--- Résumé Financier Global ---',
+      notePlaceholder: 'Note (heures sup, repos...)',
+      curr: 'DZD',
+      daysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+      days: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+      months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+      modalTitle: 'Confirmer la réinitialisation',
+      confirmReset: 'Voulez-vous vraiment réinitialiser toutes les données, suppléments et déductions ? Cette action est irréversible.',
+      modalCancel: 'Annuler',
+      modalConfirm: 'Oui, tout effacer',
+      bulkModalTitle: 'Marquer les jours passés "Non travaillé"',
+      bulkModalBodyCount: '{count} jour(s) passé(s) non enregistré(s) jusqu’à aujourd’hui seront marqués comme "Non travaillé". Continuer ?',
+      bulkModalConfirm: 'Confirmer',
+      toastNoPastUnrecorded: 'Aucun jour passé non enregistré à mettre à jour',
+      toastBulkUpdated: '{count} jour(s) marqué(s) comme "Non travaillé"',
+      toastDedAdded: 'Déduction générale ajoutée',
+      toastDedDeleted: 'Déduction supprimée',
+      toastReset: 'Toutes les données ont été réinitialisées',
+      toastExport: 'Fichier CSV exporté avec succès',
+      toastTodayNotFound: "La date d'aujourd'hui est hors période ou masquée par le filtre",
+      goalCollected: 'Atteint',
+      goalRemaining: 'Reste',
+      goalDaysNeeded: 'Environ {days} j. de travail restants',
+      goalEstDate: 'Date estimée : {date}',
+      goalUnlockedMsg: '🎉 Objectif 100% débloqué !',
+      coachTitle: 'Coach Motivation Intelligent',
+      newQuoteBtn: 'Nouvelle citation',
+      lblCurrentStreak: 'Série actuelle (jours)',
+      lblBestStreak: 'Meilleure série (jours)',
+      coachStart: '🚀 Chaque grand rêve commence par un premier pas ! Marquez votre 1er jour travaillé.',
+      coachNearGoal: '🔥 Incroyable ! Plus que {rem} DZD (~{days} j. de travail) pour débloquer "{goal}" !',
+      coachStreak: '⚡ Vous êtes en feu ! Série de {streak} jours consécutifs — gardez ce rythme !',
+      coachAllDone: '👑 Légendaire ! Vous avez atteint 100% de tous vos objectifs !',
+      badgesTitle: 'Tableau des Badges & Exploits',
+      badgesSub: 'Restez régulier pour débloquer tous les badges de réussite',
+      badgeUnlocked: 'Débloqué ✓',
+      badgeLocked: 'Verrouillé',
+      toastMilestone: '🎉 Bravo ! Vous avez atteint {pct}% de l’objectif {goal} !',
+      toastStreakMilestone: '🔥 Quelle régularité ! Série de {streak} jours consécutifs !',
+      toastWorkedBoost: '💪 Bien joué ! +2 000 DZD ajoutés à vos objectifs !',
+      statusCompleted: 'Atteint ✓',
+      statusActive: 'En cours',
+      statusWaiting: 'En attente',
+      workedBadge: 'Fait',
+      absentBadge: 'Repos',
+      absentCalSub: 'Non travaillé',
+      fridayBadge: 'Ven',
+      todayBadge: "Auj.",
+      noResults: 'Aucun jour ne correspond aux filtres sélectionnés.'
+    }
+  };
+
+  let state = {
+    lang: 'ar',
+    theme: 'light',
+    viewMode: 'both',
+    skipFriday: false,
+    completed: {},
+    absent: {},
+    bonuses: {},
+    generalDeductions: [],
+    notes: {},
+    viewYear: 2026,
+    viewMonth: 10,
+    quoteIdx: 0
+  };
+
+  const MOTIVATIONAL_QUOTES = [
+    {
+      ar: '«النجاح هو مجموع مجهودات صغيرة تتكرر يوماً بعد يوم.»',
+      fr: '« Le succès est la somme de petits efforts répétés jour après jour. »'
+    },
+    {
+      ar: '«كل يوم عمل تنجزه اليوم هو حرية وراحة تشتريها لنفسك غداً.»',
+      fr: '« Chaque journée de travail accomplie aujourd’hui est une liberté gagnée pour demain. »'
+    },
+    {
+      ar: '«الانضباط هو الجسر الذي يربط بين أهدافك وتحقيقها على أرض الواقع.»',
+      fr: '« La discipline est le pont entre vos objectifs et leur réalisation. »'
+    },
+    {
+      ar: '«لا تستصغر 2,000 دج اليوم؛ قطرة بعد قطرة تصنع نهراً يحقق كل أحلامك.»',
+      fr: '« Ne sous-estimez pas 2 000 DZD aujourd’hui ; goutte après goutte se forme un océan. »'
+    },
+    {
+      ar: '«الألم الناتج عن الالتزام مؤقت، أما فخر الإنجاز فيدوم طويلاً.»',
+      fr: '« La douleur de la discipline est temporaire, la fierté de la réussite dure toujours. »'
+    },
+    {
+      ar: '«أنت أقرب إلى هدفك مما تظن، فقط لا تتوقف الآن!»',
+      fr: '« Vous êtes plus proche de votre objectif que vous ne le pensez, ne lâchez rien ! »'
+    }
+  ];
+
+  function nextQuote() {
+    state.quoteIdx = ((state.quoteIdx || 0) + 1) % MOTIVATIONAL_QUOTES.length;
+    saveState();
+    render();
+  }
+
+  // Lightweight Canvas Confetti Celebration
+  function launchConfetti(intensity = 65) {
+    const canvas = document.getElementById('confettiCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const colors = ['#10b981', '#f59e0b', '#ec4899', '#14b8a6', '#3b82f6', '#f43f5e'];
+    const particles = Array.from({ length: intensity }, () => ({
+      x: canvas.width * (0.2 + Math.random() * 0.6),
+      y: canvas.height * 0.35,
+      vx: (Math.random() - 0.5) * 14,
+      vy: -Math.random() * 12 - 4,
+      size: Math.random() * 7 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * 360,
+      vRot: (Math.random() - 0.5) * 12,
+      life: 1
+    }));
+
+    if (window._confettiAnim) cancelAnimationFrame(window._confettiAnim);
+
+    function frame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = 0;
+      particles.forEach(p => {
+        if (p.life <= 0) return;
+        alive++;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.38;
+        p.rot += p.vRot;
+        p.life -= 0.015;
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rot * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.65);
+        ctx.restore();
+      });
+
+      if (alive > 0) {
+        window._confettiAnim = requestAnimationFrame(frame);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    window._confettiAnim = requestAnimationFrame(frame);
+  }
+
+  function calculateStreaks(dates) {
+    let currentStreak = 0;
+    let bestStreak = 0;
+    let running = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Best streak across all chronological active dates
+    dates.forEach(d => {
+      const key = formatDate(d);
+      if (state.completed[key]) {
+        running++;
+        if (running > bestStreak) bestStreak = running;
+      } else {
+        running = 0;
+      }
+    });
+
+    // Current streak walking backwards from the latest worked/past active day
+    const pastOrWorked = dates.filter(d => {
+      const clean = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const k = formatDate(clean);
+      return clean <= today || state.completed[k];
+    });
+
+    for (let i = pastOrWorked.length - 1; i >= 0; i--) {
+      const k = formatDate(pastOrWorked[i]);
+      if (state.completed[k]) {
+        currentStreak++;
+      } else if (currentStreak > 0) {
+        break;
+      }
+    }
+
+    return { currentStreak, bestStreak };
+  }
+
+  function estimateGoalDate(daysNeeded) {
+    if (daysNeeded <= 0) return null;
+    let d = new Date();
+    d.setHours(0, 0, 0, 0);
+    if (d < START_DATE) d = new Date(START_DATE.getTime());
+    let counted = 0;
+    let guard = 0;
+    while (counted < daysNeeded && guard < 1500) {
+      d.setDate(d.getDate() + 1);
+      if (!state.skipFriday || d.getDay() !== 5) {
+        counted++;
+      }
+      guard++;
+    }
+    return formatDate(d);
+  }
+
+  function getPreviousSummarySnapshot() {
+    const dates = generateDates();
+    let base = 0;
+    let bonus = 0;
+    dates.forEach(d => {
+      const k = formatDate(d);
+      if (state.completed[k]) base += DAILY_RATE;
+      bonus += Math.max(0, Number(state.bonuses[k] || 0));
+    });
+    const ded = state.generalDeductions.reduce((s, item) => s + Math.max(0, Number(item.amount) || 0), 0);
+    const net = (base + bonus) - ded;
+    const streaks = calculateStreaks(dates);
+    return { net, currentStreak: streaks.currentStreak };
+  }
+
+  function checkCelebrationOnWork(beforeSnapshot, key) {
+    const t = i18n[state.lang];
+    const afterSnapshot = getPreviousSummarySnapshot();
+    let celebrated = false;
+
+    // Check goal milestones (25%, 50%, 75%, 100%)
+    let allocBefore = Math.max(0, beforeSnapshot.net);
+    let allocAfter = Math.max(0, afterSnapshot.net);
+    const milestones = [25, 50, 75, 100];
+
+    GOALS.forEach(g => {
+      const gotB = Math.min(g.target, allocBefore);
+      allocBefore = Math.max(0, allocBefore - gotB);
+      const pctB = Math.floor((gotB / g.target) * 100);
+
+      const gotA = Math.min(g.target, allocAfter);
+      allocAfter = Math.max(0, allocAfter - gotA);
+      const pctA = Math.floor((gotA / g.target) * 100);
+
+      const crossed = milestones.filter(m => pctB < m && pctA >= m);
+      if (crossed.length > 0) {
+        const highest = crossed[crossed.length - 1];
+        const gName = g.id === 'brousi' ? 'brousi' : g.id === 'iphone' ? 'iPhone 16 Pink' : 'tepyicha';
+        launchConfetti(highest === 100 ? 130 : 80);
+        showToast(t.toastMilestone.replace('{pct}', highest).replace('{goal}', gName));
+        celebrated = true;
+      }
+    });
+
+    if (!celebrated && [3, 7, 14, 21, 30, 50, 100].includes(afterSnapshot.currentStreak) && afterSnapshot.currentStreak > beforeSnapshot.currentStreak) {
+      launchConfetti(75);
+      showToast(t.toastStreakMilestone.replace('{streak}', afterSnapshot.currentStreak));
+      celebrated = true;
+    }
+
+    if (!celebrated) {
+      launchConfetti(32);
+      showToast(t.toastWorkedBoost);
+    }
+  }
+  function setDayStatus(key, status) {
+    const wasWorked = !!state.completed[key];
+    const beforeSnap = (!wasWorked && status === 'worked') ? getPreviousSummarySnapshot() : null;
+
+    if (status === 'worked') {
+      state.completed[key] = true;
+      delete state.absent[key];
+    } else if (status === 'absent') {
+      delete state.completed[key];
+      state.absent[key] = true;
+    } else {
+      delete state.completed[key];
+      delete state.absent[key];
+    }
+    saveState();
+    render();
+
+    if (!wasWorked && status === 'worked' && beforeSnap) {
+      checkCelebrationOnWork(beforeSnap, key);
+    }
+  }
+
+  function applyTheme() {
+    if (state.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }
+
+  function toggleTheme() {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    applyTheme();
+    saveState();
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem('workGoalTrackerV6', JSON.stringify(state));
+    } catch (e) {
+      console.warn('Could not save state:', e);
+    }
+  }
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => {
+      el.classList.add('hidden');
+    }, 2600);
+  }
+
+  function formatDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function generateDates() {
+    const list = [];
+    let current = new Date(START_DATE.getTime());
+    while (current <= END_DATE) {
+      if (!state.skipFriday || current.getDay() !== 5) {
+        list.push(new Date(current.getTime()));
+      }
+      current.setDate(current.getDate() + 1);
+    }
+    return list;
+  }
+
+  function setViewMode(mode) {
+    state.viewMode = mode;
+    saveState();
+    applyViewMode();
+  }
+
+  function applyViewMode() {
+    const calSec = document.getElementById('calendarSection');
+    const tblSec = document.getElementById('tableSection');
+    const dedSec = document.getElementById('deductionsSection');
+    const tabs = {
+      both: document.getElementById('tabBoth'),
+      calendar: document.getElementById('tabCalendar'),
+      table: document.getElementById('tabTable'),
+      deductions: document.getElementById('tabDeductions')
+    };
+
+    Object.entries(tabs).forEach(([key, btn]) => {
+      if (!btn) return;
+      if (key === state.viewMode) {
+        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs';
+      } else {
+        btn.className = 'px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+      }
+    });
+
+    if (state.viewMode === 'both') {
+      calSec.classList.remove('hidden');
+      tblSec.classList.remove('hidden');
+      dedSec.classList.remove('hidden');
+    } else if (state.viewMode === 'calendar') {
+      calSec.classList.remove('hidden');
+      tblSec.classList.add('hidden');
+      dedSec.classList.add('hidden');
+    } else if (state.viewMode === 'table') {
+      calSec.classList.add('hidden');
+      tblSec.classList.remove('hidden');
+      dedSec.classList.add('hidden');
+    } else if (state.viewMode === 'deductions') {
+      calSec.classList.add('hidden');
+      tblSec.classList.add('hidden');
+      dedSec.classList.remove('hidden');
+    }
+  }
+
+  function populateMonthFilter(dates, t) {
+    const select = document.getElementById('filterMonth');
+    const currentVal = select.value || 'all';
+    const seen = new Set();
+    let html = `<option value="all">${t.optAllMonths}</option>`;
+
+    dates.forEach(d => {
+      const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (!seen.has(ym)) {
+        seen.add(ym);
+        const label = `${t.months[d.getMonth()]} ${d.getFullYear()}`;
+        html += `<option value="${ym}">${label}</option>`;
+      }
+    });
+
+    select.innerHTML = html;
+    if (seen.has(currentVal) || currentVal === 'all') {
+      select.value = currentVal;
+    }
+  }
+
+  function renderGoals(netAmount, t) {
+    const grid = document.getElementById('goalsGrid');
+    grid.innerHTML = '';
+    let allocated = Math.max(0, netAmount);
+    let foundActive = false;
+    let cumulativeRemAmount = 0;
+
+    GOALS.forEach((g) => {
+      const got = Math.min(g.target, allocated);
+      allocated = Math.max(0, allocated - got);
+      const rem = Math.max(0, g.target - got);
+      cumulativeRemAmount += rem;
+      const daysNeeded = Math.ceil(cumulativeRemAmount / DAILY_RATE);
+      const estDate = estimateGoalDate(daysNeeded);
+      const pct = Math.min(100, Math.round((got / g.target) * 100));
+
+      let status = 'waiting';
+      if (got >= g.target) {
+        status = 'completed';
+      } else if (!foundActive) {
+        status = 'active';
+        foundActive = true;
+      }
+
+      const isPink = g.accent === 'pink';
+      const borderClass = status === 'active'
+        ? (isPink ? 'border-pink-400 dark:border-pink-500/70 ring-2 ring-pink-500/15' : 'border-emerald-500 dark:border-emerald-500/70 ring-2 ring-emerald-500/15')
+        : status === 'completed'
+          ? 'border-emerald-200 dark:border-emerald-800/60'
+          : 'border-slate-200/80 dark:border-slate-800';
+
+      let badgeHtml = '';
+      if (status === 'completed') {
+        badgeHtml = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">${t.statusCompleted}</span>`;
+      } else if (status === 'active') {
+        badgeHtml = isPink
+          ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-pink-100 dark:bg-pink-950 text-pink-700 dark:text-pink-300">${t.statusActive}</span>`
+          : `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300">${t.statusActive}</span>`;
+      } else {
+        badgeHtml = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">${t.statusWaiting}</span>`;
+      }
+
+      const barGradient = isPink
+        ? 'bg-gradient-to-r from-pink-500 via-rose-400 to-pink-600'
+        : 'bg-gradient-to-r from-emerald-600 via-teal-400 to-emerald-500';
+
+      const iconSvg = isPink
+        ? `<svg class="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>`
+        : `<svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>`;
+
+      const milestonePills = [25, 50, 75, 100].map(m => {
+        const reached = pct >= m;
+        const activeCls = isPink
+          ? 'bg-pink-100 dark:bg-pink-950/70 text-pink-700 dark:text-pink-300 border-pink-300 dark:border-pink-700'
+          : 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700';
+        const idleCls = 'bg-slate-50 dark:bg-slate-800/60 text-slate-400 dark:text-slate-500 border-slate-200 dark:border-slate-700';
+        return `<span class="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold border tabular-nums ${reached ? activeCls : idleCls}">${reached ? '✓ ' : ''}${m}%</span>`;
+      }).join('');
+
+      const countdownFooter = status === 'completed'
+        ? `<div class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 pt-1">${t.goalUnlockedMsg}</div>`
+        : `<div class="flex flex-wrap items-center justify-between gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800/80 tabular-nums">
+            <span>⏳ ${t.goalDaysNeeded.replace('{days}', daysNeeded)}</span>
+            ${estDate ? `<span dir="ltr" class="text-slate-600 dark:text-slate-300">📅 ${t.goalEstDate.replace('{date}', estDate)}</span>` : ''}
+          </div>`;
+
+      const card = document.createElement('div');
+      card.className = `bg-white dark:bg-slate-900 border ${borderClass} rounded-2xl p-4 sm:p-5 shadow-sm transition-all flex flex-col justify-between gap-3`;
+      card.innerHTML = `
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              ${state.lang === 'ar' ? g.priorityAr : g.priorityFr}
+            </span>
+            ${badgeHtml}
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              ${iconSvg}
+              <h3 class="font-extrabold text-base text-slate-900 dark:text-white">${state.lang === 'ar' ? g.ar : g.fr}</h3>
+            </div>
+            <span class="font-extrabold text-sm ${isPink ? 'text-pink-600 dark:text-pink-400' : 'text-emerald-700 dark:text-emerald-400'} tabular-nums">
+              ${g.target.toLocaleString()} ${t.curr}
+            </span>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between items-center text-xs font-semibold text-slate-500 dark:text-slate-400 tabular-nums">
+            <span>${t.goalCollected}: <strong class="text-slate-800 dark:text-slate-200">${got.toLocaleString()} ${t.curr}</strong></span>
+            <span class="font-extrabold ${isPink ? 'text-pink-600 dark:text-pink-400' : 'text-emerald-600 dark:text-emerald-400'}">${pct}%</span>
+            <span>${t.goalRemaining}: <strong class="text-slate-800 dark:text-slate-200">${rem.toLocaleString()} ${t.curr}</strong></span>
+          </div>
+          <div class="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5">
+            <div class="h-full rounded-full ${barGradient} ${status === 'active' ? 'progress-shimmer' : ''} transition-all duration-500" style="width:${pct}%"></div>
+          </div>
+          <div class="flex items-center justify-between gap-1 pt-0.5">
+            ${milestonePills}
+          </div>
+          ${countdownFooter}
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function renderMotivationAndBadges(completedCount, totalBonuses, netTotal, streaks, t) {
+    // Update Quote & Coach Banner
+    const qObj = MOTIVATIONAL_QUOTES[(state.quoteIdx || 0) % MOTIVATIONAL_QUOTES.length];
+    document.getElementById('coachTitle').textContent = t.coachTitle;
+    document.getElementById('newQuoteBtnText').textContent = t.newQuoteBtn;
+    document.getElementById('quoteText').textContent = state.lang === 'ar' ? qObj.ar : qObj.fr;
+    document.getElementById('valCurrentStreak').textContent = streaks.currentStreak;
+    document.getElementById('valBestStreak').textContent = streaks.bestStreak;
+    document.getElementById('lblCurrentStreak').textContent = t.lblCurrentStreak;
+    document.getElementById('lblBestStreak').textContent = t.lblBestStreak;
+
+    // Dynamic smart coach message
+    let coachMsg = t.coachStart;
+    if (netTotal >= 350000) {
+      coachMsg = t.coachAllDone;
+    } else if (completedCount > 0) {
+      let alloc = Math.max(0, netTotal);
+      let nextGoal = null;
+      let remForNext = 0;
+      for (const g of GOALS) {
+        const got = Math.min(g.target, alloc);
+        alloc = Math.max(0, alloc - got);
+        if (got < g.target) {
+          nextGoal = g.id === 'brousi' ? 'brousi' : g.id === 'iphone' ? 'iPhone 16 Pink' : 'tepyicha';
+          remForNext = g.target - got;
+          break;
+        }
+      }
+      if (streaks.currentStreak >= 3 && remForNext > 30000) {
+        coachMsg = t.coachStreak.replace('{streak}', streaks.currentStreak);
+      } else if (nextGoal) {
+        const daysLeft = Math.ceil(remForNext / DAILY_RATE);
+        coachMsg = t.coachNearGoal
+          .replace('{rem}', remForNext.toLocaleString())
+          .replace('{days}', daysLeft)
+          .replace('{goal}', nextGoal);
+      }
+    }
+    document.getElementById('coachDynamicMsg').textContent = coachMsg;
+
+    // Render 8 Achievement Badges
+    document.getElementById('badgesTitle').textContent = t.badgesTitle;
+    document.getElementById('badgesSub').textContent = t.badgesSub;
+
+    const badges = [
+      {
+        icon: '🌱',
+        ar: 'أول خطوة',
+        fr: 'Premier Pas',
+        descAr: 'إنجاز أول يوم عمل',
+        descFr: '1er jour travaillé',
+        unlocked: completedCount >= 1
+      },
+      {
+        icon: '🚀',
+        ar: 'انطلاقة قوية',
+        fr: 'Bon Départ',
+        descAr: 'إنجاز 5 أيام عمل',
+        descFr: '5 jours travaillés',
+        unlocked: completedCount >= 5
+      },
+      {
+        icon: '🔥',
+        ar: 'نار الالتزام',
+        fr: 'Série de Feu',
+        descAr: 'سلسلة 7 أيام متتالية',
+        descFr: 'Série de 7 jours',
+        unlocked: streaks.bestStreak >= 7
+      },
+      {
+        icon: '💎',
+        ar: 'صائد الزيادات',
+        fr: 'Chasseur de Bonus',
+        descAr: 'تحقيق زيادات إضافية',
+        descFr: 'Gagner un bonus',
+        unlocked: totalBonuses > 0
+      },
+      {
+        icon: '🏅',
+        ar: 'بطل 25 يوماً',
+        fr: 'Champion 25j',
+        descAr: 'إنجاز 25 يوم عمل',
+        descFr: '25 jours travaillés',
+        unlocked: completedCount >= 25
+      },
+      {
+        icon: '🎯',
+        ar: 'هدف brousi',
+        fr: 'Objectif brousi',
+        descAr: 'الوصول إلى 100,000 دج',
+        descFr: 'Atteindre 100 000 DZD',
+        unlocked: netTotal >= 100000
+      },
+      {
+        icon: '📱',
+        ar: 'iPhone 16 Pink',
+        fr: 'iPhone 16 Pink',
+        descAr: 'الوصول إلى 250,000 دج',
+        descFr: 'Atteindre 250 000 DZD',
+        unlocked: netTotal >= 250000
+      },
+      {
+        icon: '👑',
+        ar: 'الأسطورة',
+        fr: 'Légende',
+        descAr: 'تحقيق كل الأهداف 350,000 دج',
+        descFr: 'Tous les objectifs (350k)',
+        unlocked: netTotal >= 350000
+      }
+    ];
+
+    const unlockedCount = badges.filter(b => b.unlocked).length;
+    document.getElementById('badgesProgressBadge').textContent = `${unlockedCount} / ${badges.length}`;
+
+    const badgesGrid = document.getElementById('badgesGrid');
+    badgesGrid.innerHTML = badges.map(b => `
+      <div class="p-3 rounded-2xl border text-center transition-all flex flex-col items-center justify-between gap-1.5 ${
+        b.unlocked
+          ? 'bg-gradient-to-b from-amber-50/90 to-emerald-50/70 dark:from-amber-950/30 dark:to-emerald-950/25 border-amber-300 dark:border-amber-700/70 shadow-xs'
+          : 'bg-slate-50/70 dark:bg-slate-800/40 border-slate-200/80 dark:border-slate-800 opacity-60 grayscale'
+      }">
+        <div class="text-2xl ${b.unlocked ? 'scale-110' : ''}">${b.icon}</div>
+        <div class="font-extrabold text-xs text-slate-900 dark:text-white leading-tight">
+          ${state.lang === 'ar' ? b.ar : b.fr}
+        </div>
+        <div class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 leading-tight">
+          ${state.lang === 'ar' ? b.descAr : b.descFr}
+        </div>
+        <span class="mt-0.5 px-2 py-0.5 rounded-full text-[9px] font-extrabold ${
+          b.unlocked
+            ? 'bg-emerald-600 text-white'
+            : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+        }">
+          ${b.unlocked ? t.badgeUnlocked : t.badgeLocked}
+        </span>
+      </div>
+    `).join('');
+  }
+
+  function renderCalendar(activeDateMap, t) {
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
+
+    const y = state.viewYear;
+    const m = state.viewMonth;
+    const todayKey = formatDate(new Date());
+    document.getElementById('calMonthTitle').textContent = `${t.months[m]} ${y}`;
+
+    t.daysShort.forEach((dow, idx) => {
+      const el = document.createElement('div');
+      const isFri = idx === 5;
+      el.className = `text-center font-bold text-xs py-2 px-1 rounded-xl ${isFri ? 'bg-amber-50/80 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400' : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300'}`;
+      el.textContent = dow;
+      grid.appendChild(el);
+    });
+
+    const firstDayOfMonth = new Date(y, m, 1);
+    const startDow = firstDayOfMonth.getDay();
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+    for (let i = 0; i < startDow; i++) {
+      const blank = document.createElement('div');
+      blank.className = 'min-h-[62px] sm:min-h-[74px] rounded-xl bg-slate-50/50 dark:bg-slate-950/40 border border-dashed border-slate-200/60 dark:border-slate-800/60';
+      grid.appendChild(blank);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dObj = new Date(y, m, day);
+      const key = formatDate(dObj);
+      const inRange = activeDateMap.has(key);
+      const status = getDayStatus(key);
+      const isDone = status === 'worked';
+      const isAbsent = status === 'absent';
+      const bonusVal = Math.max(0, Number(state.bonuses[key] || 0));
+      const dayEarnings = (isDone ? DAILY_RATE : 0) + bonusVal;
+      const isToday = key === todayKey;
+      const isFri = dObj.getDay() === 5;
+      const note = state.notes[key] || '';
+
+      const cell = document.createElement('div');
+      let baseClasses = 'min-h-[62px] sm:min-h-[74px] p-1.5 sm:p-2 rounded-xl border flex flex-col justify-between transition-all select-none relative ';
+
+      if (!inRange) {
+        baseClasses += 'bg-slate-50/60 dark:bg-slate-950/50 border-dashed border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-default';
+      } else if (isDone && bonusVal > 0) {
+        baseClasses += 'bg-teal-50 dark:bg-teal-950/45 border-amber-400 dark:border-amber-500/80 ring-1 ring-amber-400/50 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm';
+      } else if (isDone) {
+        baseClasses += 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700/70 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm';
+      } else if (isAbsent) {
+        baseClasses += 'bg-rose-50/90 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800/70 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm';
+      } else if (bonusVal > 0) {
+        baseClasses += 'bg-teal-50/70 dark:bg-teal-950/30 border-teal-300 dark:border-teal-700 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm';
+      } else {
+        baseClasses += 'bg-white dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/80 cursor-pointer hover:border-emerald-500 dark:hover:border-emerald-500 hover:-translate-y-0.5 hover:shadow-sm';
+      }
+
+      if (isToday) {
+        baseClasses += ' ring-2 ring-emerald-600 dark:ring-emerald-400';
+      }
+
+      cell.className = baseClasses;
+      if (inRange) {
+        cell.onclick = () => cycleDayStatus(key);
+        cell.title = note ? `${note} (${t.calCycleHint})` : t.calCycleHint;
+      }
+
+      let statusBadge = '';
+      if (inRange && isDone) {
+        const badgeBg = bonusVal > 0 ? 'bg-teal-600 text-white' : 'bg-emerald-600 text-white';
+        const badgeTxt = bonusVal > 0 ? `+${bonusVal.toLocaleString()}` : t.workedBadge;
+        statusBadge = `<span class="hidden sm:inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md ${badgeBg}">${badgeTxt}</span>`;
+      } else if (inRange && isAbsent) {
+        statusBadge = `<span class="hidden sm:inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-rose-600 text-white">${t.absentBadge}</span>`;
+      } else if (inRange && isFri) {
+        statusBadge = `<span class="hidden sm:inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">${t.fridayBadge}</span>`;
+      }
+
+      let subText = '';
+      if (inRange && isDone) {
+        subText = `<span class="font-bold ${bonusVal > 0 ? 'text-teal-700 dark:text-teal-300' : 'text-emerald-700 dark:text-emerald-300'}">${dayEarnings.toLocaleString()} ${t.curr}</span>`;
+      } else if (inRange && isAbsent) {
+        subText = bonusVal > 0
+          ? `<span class="font-bold text-teal-700 dark:text-teal-300">+${bonusVal.toLocaleString()} ${t.curr}</span>`
+          : `<span class="font-bold text-rose-600 dark:text-rose-400">${t.absentCalSub}</span>`;
+      } else if (inRange && bonusVal > 0) {
+        subText = `<span class="font-bold text-teal-600 dark:text-teal-400">+${bonusVal.toLocaleString()} ${t.curr}</span>`;
+      } else if (isToday) {
+        subText = `<span class="font-bold text-emerald-600 dark:text-emerald-400">${t.todayBadge}</span>`;
+      }
+
+      cell.innerHTML = `
+        <div class="flex items-center justify-between gap-1">
+          <span class="text-xs sm:text-sm font-extrabold tabular-nums ${isToday ? 'text-emerald-700 dark:text-emerald-300' : isAbsent ? 'text-rose-700 dark:text-rose-300' : ''}">${day}</span>
+          ${statusBadge}
+        </div>
+        <div class="text-[10px] sm:text-xs truncate tabular-nums">
+          ${subText}
+        </div>
+      `;
+      grid.appendChild(cell);
+    }
+  }
+
+  function renderGeneralDeductions(t) {
+    const listEl = document.getElementById('generalDeductionsList');
+    const totalEl = document.getElementById('dedSectionTotal');
+    let totalDed = 0;
+
+    state.generalDeductions.forEach(item => {
+      totalDed += Math.max(0, Number(item.amount) || 0);
+    });
+
+    totalEl.textContent = `-${totalDed.toLocaleString()} ${t.curr}`;
+
+    if (state.generalDeductions.length === 0) {
+      listEl.innerHTML = `<div class="text-center py-4 text-xs sm:text-sm font-semibold text-slate-400 dark:text-slate-500 bg-slate-50/70 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">${t.noDeductionsMsg}</div>`;
+      return totalDed;
+    }
+
+    // Sort newest first for display
+    const sorted = [...state.generalDeductions].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    listEl.innerHTML = sorted.map(item => `
+      <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-rose-50/60 dark:bg-rose-950/25 border border-rose-200/70 dark:border-rose-900/50">
+        <div class="flex items-center gap-3 min-w-0">
+          <span class="px-2.5 py-1 rounded-lg bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-extrabold text-xs sm:text-sm tabular-nums shrink-0">
+            -${Number(item.amount).toLocaleString()} ${t.curr}
+          </span>
+          <div class="min-w-0">
+            <div class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 truncate">${item.reason.replace(/</g, '&lt;')}</div>
+            <div class="text-[11px] font-mono text-slate-500 dark:text-slate-400 tabular-nums" dir="ltr">${item.date}</div>
+          </div>
+        </div>
+        <button type="button" onclick="deleteGeneralDeduction('${item.id}')" title="${t.deleteDedTitle}"
+          class="p-2 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors shrink-0">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </button>
+      </div>
+    `).join('');
+
+    return totalDed;
+  }
+
+  function render() {
+    const t = i18n[state.lang];
+    document.documentElement.dir = t.dir;
+    document.documentElement.lang = state.lang;
+
+    document.getElementById('langBtn').textContent = t.langBtn;
+    document.getElementById('appTitle').textContent = t.title;
+    document.getElementById('exportBtnText').textContent = t.exportBtn;
+    document.getElementById('resetBtnText').textContent = t.resetBtn;
+    document.getElementById('lblGross').textContent = t.lblGross;
+    document.getElementById('valRateSub').textContent = t.valRateSub;
+    document.getElementById('lblBonuses').textContent = t.lblBonuses;
+    document.getElementById('lblDeductions').textContent = t.lblDeductions;
+    document.getElementById('lblNet').textContent = t.lblNet;
+    document.getElementById('lblDays').textContent = t.lblDays;
+    document.getElementById('dedSectionTitle').textContent = t.dedSectionTitle;
+    document.getElementById('dedSectionSub').textContent = t.dedSectionSub;
+    document.getElementById('dedBadgeLabel').textContent = t.dedBadgeLabel;
+    document.getElementById('newDedAmount').placeholder = t.newDedAmountPh;
+    document.getElementById('newDedReason').placeholder = t.newDedReasonPh;
+    document.getElementById('addDedBtnText').textContent = t.addDedBtn;
+    document.getElementById('lblSkipFriday').textContent = t.lblSkipFriday;
+    document.getElementById('lblRangeInfo').textContent = t.lblRangeInfo;
+    document.getElementById('tabBoth').textContent = t.tabBoth;
+    document.getElementById('tabCalendar').textContent = t.tabCalendar;
+    document.getElementById('tabTable').textContent = t.tabTable;
+    document.getElementById('tabDeductions').textContent = t.tabDeductions;
+    document.getElementById('prevMonthBtn').textContent = t.prevMonth;
+    document.getElementById('nextMonthBtn').textContent = t.nextMonth;
+    document.getElementById('todayMonthBtn').textContent = t.todayMonth;
+    document.getElementById('startMonthBtn').textContent = t.startMonth;
+    document.getElementById('scrollTodayBtn').textContent = t.scrollToday;
+    document.getElementById('bulkAbsentBtnText').textContent = t.bulkAbsentBtn;
+    document.getElementById('optAll').textContent = t.optAll;
+    document.getElementById('optDone').textContent = t.optDone;
+    document.getElementById('optAbsent').textContent = t.optAbsent;
+    document.getElementById('optUndone').textContent = t.optUndone;
+    document.getElementById('optBonus').textContent = t.optBonus;
+    document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+    document.getElementById('legWorked').textContent = t.legWorked;
+    document.getElementById('legWorkedBonus').textContent = t.legWorkedBonus;
+    document.getElementById('legAbsent').textContent = t.legAbsent;
+    document.getElementById('legUnworked').textContent = t.legUnworked;
+    document.getElementById('legOutRange').textContent = t.legOutRange;
+    document.getElementById('calCycleHint').textContent = t.calCycleHint;
+    document.getElementById('thNum').textContent = t.thNum;
+    document.getElementById('thDay').textContent = t.thDay;
+    document.getElementById('thDate').textContent = t.thDate;
+    document.getElementById('thStatus').textContent = t.thStatus;
+    document.getElementById('thBonus').textContent = t.thBonus;
+    document.getElementById('thNetDay').textContent = t.thNetDay;
+    document.getElementById('thCumulative').textContent = t.thCumulative;
+    document.getElementById('thNote').textContent = t.thNote;
+    document.getElementById('skipFriday').checked = state.skipFriday;
+
+    // Default date input if empty
+    const dedDateInput = document.getElementById('newDedDate');
+    if (dedDateInput && !dedDateInput.value) {
+      dedDateInput.value = formatDate(new Date());
+    }
+
+    // Update modal strings
+    document.getElementById('modalTitle').textContent = t.modalTitle;
+    document.getElementById('modalBody').textContent = t.confirmReset;
+    document.getElementById('modalCancelBtn').textContent = t.modalCancel;
+    document.getElementById('modalConfirmBtn').textContent = t.modalConfirm;
+    document.getElementById('bulkModalTitle').textContent = t.bulkModalTitle;
+    document.getElementById('bulkModalCancelBtn').textContent = t.modalCancel;
+    document.getElementById('bulkModalConfirmBtn').textContent = t.bulkModalConfirm;
+
+    const dates = generateDates();
+    populateMonthFilter(dates, t);
+
+    const activeDateMap = new Set(dates.map(d => formatDate(d)));
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+
+    const statusFilter = document.getElementById('filterStatus').value;
+    const monthFilter = document.getElementById('filterMonth').value;
+    const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+    const todayKey = formatDate(new Date());
+
+    let completedCount = 0;
+    let absentCount = 0;
+    let totalBaseGross = 0;
+    let totalBonuses = 0;
+    let runningGrossWithBonus = 0;
+    let visibleRows = 0;
+
+    dates.forEach((dateObj, idx) => {
+      const dayNum = idx + 1;
+      const key = formatDate(dateObj);
+      const ym = key.slice(0, 7);
+      const status = getDayStatus(key);
+      const isDone = status === 'worked';
+      const isAbsent = status === 'absent';
+      const bonusVal = Math.max(0, Number(state.bonuses[key] || 0));
+      const baseDay = isDone ? DAILY_RATE : 0;
+      const dayTotal = baseDay + bonusVal;
+
+      if (isDone) completedCount++;
+      if (isAbsent) absentCount++;
+      totalBaseGross += baseDay;
+      totalBonuses += bonusVal;
+      runningGrossWithBonus += dayTotal;
+
+      // Apply filters for display
+      if (statusFilter === 'done' && !isDone) return;
+      if (statusFilter === 'absent' && !isAbsent) return;
+      if (statusFilter === 'undone' && status !== 'none') return;
+      if (statusFilter === 'bonus' && bonusVal <= 0) return;
+      if (monthFilter !== 'all' && ym !== monthFilter) return;
+
+      const dayName = t.days[dateObj.getDay()];
+      const noteVal = state.notes[key] || '';
+      if (searchQuery) {
+        const hay = `${key} ${dayName} ${noteVal}`.toLowerCase();
+        if (!hay.includes(searchQuery)) return;
+      }
+
+      visibleRows++;
+      const tr = document.createElement('tr');
+      tr.id = `row-${key}`;
+      const isToday = key === todayKey;
+
+      let rowBg = 'hover:bg-slate-50/90 dark:hover:bg-slate-800/40 transition-colors';
+      if (isDone && bonusVal > 0) {
+        rowBg = 'bg-teal-50/80 dark:bg-teal-950/30 hover:bg-teal-50 dark:hover:bg-teal-950/45 transition-colors';
+      } else if (isDone) {
+        rowBg = 'bg-emerald-50/70 dark:bg-emerald-950/25 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors';
+      } else if (isAbsent) {
+        rowBg = 'bg-rose-50/70 dark:bg-rose-950/25 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors';
+      } else if (bonusVal > 0) {
+        rowBg = 'bg-teal-50/40 dark:bg-teal-950/15 hover:bg-teal-50/70 transition-colors';
+      }
+
+      tr.className = rowBg;
+
+      const workedBtnClass = isDone
+        ? (bonusVal > 0
+            ? 'bg-teal-600 hover:bg-teal-700 text-white border-teal-600 shadow-xs'
+            : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 shadow-xs')
+        : 'bg-white dark:bg-slate-800 hover:border-emerald-500 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700';
+
+      const absentBtnClass = isAbsent
+        ? 'bg-rose-600 hover:bg-rose-700 text-white border-rose-600 shadow-xs'
+        : 'bg-white dark:bg-slate-800 hover:border-rose-500 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+
+      tr.innerHTML = `
+        <td class="py-3 px-3 font-bold text-slate-500 dark:text-slate-400 tabular-nums">${dayNum}</td>
+        <td class="py-3 px-3 font-semibold text-slate-800 dark:text-slate-200">
+          <div class="flex items-center gap-1.5">
+            <span>${dayName}</span>
+            ${isToday ? `<span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300">${t.todayBadge}</span>` : ''}
+          </div>
+        </td>
+        <td class="py-3 px-3 font-mono text-xs sm:text-sm text-slate-600 dark:text-slate-300 tabular-nums" dir="ltr">${key}</td>
+        <td class="py-3 px-3">
+          <div class="flex items-center gap-1.5">
+            <button onclick="toggleStatusButton('${key}', 'worked')"
+              class="px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all whitespace-nowrap ${workedBtnClass}">
+              ${t.btnMark}
+            </button>
+            <button onclick="toggleStatusButton('${key}', 'absent')"
+              class="px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all whitespace-nowrap ${absentBtnClass}">
+              ${t.btnAbsent}
+            </button>
+          </div>
+        </td>
+        <td class="py-3 px-3">
+          <input type="number" min="0" step="100" value="${bonusVal || ''}" placeholder="0"
+            onchange="updateBonus('${key}', this.value)"
+            class="w-24 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-center text-sm font-bold text-teal-600 dark:text-teal-400 tabular-nums focus:outline-none focus:border-teal-500">
+        </td>
+        <td class="py-3 px-3 font-extrabold tabular-nums ${dayTotal > 0 ? 'text-slate-900 dark:text-white' : isAbsent ? 'text-rose-600/80 dark:text-rose-400/80' : 'text-slate-400 dark:text-slate-500'}">
+          ${dayTotal.toLocaleString()} ${t.curr}
+        </td>
+        <td class="py-3 px-3 font-extrabold text-emerald-700 dark:text-emerald-400 tabular-nums">
+          ${runningGrossWithBonus.toLocaleString()} ${t.curr}
+        </td>
+        <td class="py-3 px-3">
+          <input type="text" value="${noteVal.replace(/"/g, '&quot;')}" placeholder="${t.notePlaceholder}"
+            onchange="updateNote('${key}', this.value)"
+            class="w-full min-w-[150px] px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500">
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    if (visibleRows === 0) {
+      const emptyTr = document.createElement('tr');
+      emptyTr.innerHTML = `<td colspan="8" class="py-8 text-center text-slate-500 dark:text-slate-400 font-semibold">${t.noResults}</td>`;
+      tbody.appendChild(emptyTr);
+    }
+
+    const totalGeneralDeductions = renderGeneralDeductions(t);
+    const netTotal = (totalBaseGross + totalBonuses) - totalGeneralDeductions;
+    const remainingUnrecorded = Math.max(0, dates.length - completedCount - absentCount);
+    const streaks = calculateStreaks(dates);
+
+    document.getElementById('valGross').textContent = `${totalBaseGross.toLocaleString()} ${t.curr}`;
+    document.getElementById('valBonuses').textContent = `+${totalBonuses.toLocaleString()} ${t.curr}`;
+    document.getElementById('valDeductions').textContent = `-${totalGeneralDeductions.toLocaleString()} ${t.curr}`;
+    document.getElementById('valNet').textContent = `${netTotal.toLocaleString()} ${t.curr}`;
+    document.getElementById('valDays').textContent = `${completedCount} / ${dates.length}`;
+    document.getElementById('valDaysSub').textContent = t.daysSubFormat
+      .replace('{absent}', absentCount)
+      .replace('{remaining}', remainingUnrecorded);
+
+    renderMotivationAndBadges(completedCount, totalBonuses, netTotal, streaks, t);
+    renderGoals(netTotal, t);
+    renderCalendar(activeDateMap, t);
+    applyViewMode();
+  }
+
+  function changeMonth(delta) {
+    const d = new Date(state.viewYear, state.viewMonth + delta, 1);
+    state.viewYear = d.getFullYear();
+    state.viewMonth = d.getMonth();
+    saveState();
+    render();
+  }
+
+  function jumpToStartMonth() {
+    state.viewYear = START_DATE.getFullYear();
+    state.viewMonth = START_DATE.getMonth();
+    saveState();
+    render();
+  }
+
+  function jumpToTodayMonth() {
+    const now = new Date();
+    if (now >= START_DATE && now <= END_DATE) {
+      state.viewYear = now.getFullYear();
+      state.viewMonth = now.getMonth();
+    } else {
+      state.viewYear = START_DATE.getFullYear();
+      state.viewMonth = START_DATE.getMonth();
+    }
+    saveState();
+    render();
+  }
+
+  function scrollToTodayRow() {
+    if (state.viewMode === 'calendar') {
+      setViewMode('both');
+    }
+    const todayKey = formatDate(new Date());
+    const row = document.getElementById(`row-${todayKey}`);
+    if (row) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      row.classList.add('ring-2', 'ring-emerald-500');
+      setTimeout(() => row.classList.remove('ring-2', 'ring-emerald-500'), 2000);
+    } else {
+      showToast(i18n[state.lang].toastTodayNotFound);
+    }
+  }
+
+  function toggleDay(key) {
+    cycleDayStatus(key);
+  }
+
+  function getPastUnrecordedKeys() {
+    const tToday = new Date();
+    tToday.setHours(0, 0, 0, 0);
+    const dates = generateDates();
+    const keys = [];
+    dates.forEach(d => {
+      const dClean = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      if (dClean <= tToday) {
+        const key = formatDate(dClean);
+        if (getDayStatus(key) === 'none') {
+          keys.push(key);
+        }
+      }
+    });
+    return keys;
+  }
+
+  function getDayStatus(key) {
+    if (state.completed && state.completed[key]) return 'worked';
+    if (state.absent && state.absent[key]) return 'absent';
+    return 'none';
+  }
+
+  function cycleDayStatus(key) {
+    const current = getDayStatus(key);
+    if (current === 'none') {
+      setDayStatus(key, 'worked');
+    } else if (current === 'worked') {
+      setDayStatus(key, 'absent');
+    } else {
+      setDayStatus(key, 'none');
+    }
+  }
+
+  function toggleStatusButton(key, targetStatus) {
+    const current = getDayStatus(key);
+    if (current === targetStatus) {
+      setDayStatus(key, 'none');
+    } else {
+      setDayStatus(key, targetStatus);
+    }
+  }
+
+  function openBulkAbsentModal() {
+    const t = i18n[state.lang];
+    const keys = getPastUnrecordedKeys();
+    if (keys.length === 0) {
+      showToast(t.toastNoPastUnrecorded);
+      return;
+    }
+    document.getElementById('bulkModalBody').textContent = t.bulkModalBodyCount.replace('{count}', keys.length);
+    const modal = document.getElementById('bulkAbsentModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeBulkAbsentModal() {
+    const modal = document.getElementById('bulkAbsentModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function confirmBulkAbsent() {
+    const t = i18n[state.lang];
+    const keys = getPastUnrecordedKeys();
+    keys.forEach(key => {
+      delete state.completed[key];
+      state.absent[key] = true;
+    });
+    saveState();
+    render();
+    closeBulkAbsentModal();
+    if (keys.length > 0) {
+      showToast(t.toastBulkUpdated.replace('{count}', keys.length));
+    }
+  }
+
+  function updateBonus(key, val) {
+    const num = Math.max(0, Number(val) || 0);
+    if (num === 0) {
+      delete state.bonuses[key];
+    } else {
+      state.bonuses[key] = num;
+    }
+    saveState();
+    render();
+  }
+
+  function addGeneralDeduction(e) {
+    e.preventDefault();
+    const amtInput = document.getElementById('newDedAmount');
+    const reasonInput = document.getElementById('newDedReason');
+    const dateInput = document.getElementById('newDedDate');
+
+    const amount = Math.max(0, Number(amtInput.value) || 0);
+    const reason = reasonInput.value.trim();
+    const date = dateInput.value || formatDate(new Date());
+
+    if (amount <= 0 || !reason) return;
+
+    state.generalDeductions.push({
+      id: 'ded-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+      amount,
+      reason,
+      date
+    });
+
+    amtInput.value = '';
+    reasonInput.value = '';
+    saveState();
+    render();
+    showToast(i18n[state.lang].toastDedAdded);
+  }
+
+  function deleteGeneralDeduction(id) {
+    state.generalDeductions = state.generalDeductions.filter(item => item.id !== id);
+    saveState();
+    render();
+    showToast(i18n[state.lang].toastDedDeleted);
+  }
+
+  function updateNote(key, val) {
+    state.notes[key] = val;
+    saveState();
+  }
+
+  function toggleLang() {
+    state.lang = state.lang === 'ar' ? 'fr' : 'ar';
+    saveState();
+    render();
+  }
+
+  function toggleSkipFriday() {
+    state.skipFriday = document.getElementById('skipFriday').checked;
+    saveState();
+    render();
+  }
+
+  function openResetModal() {
+    const modal = document.getElementById('resetModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeResetModal() {
+    const modal = document.getElementById('resetModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function confirmReset() {
+    state.completed = {};
+    state.absent = {};
+    state.bonuses = {};
+    state.generalDeductions = [];
+    state.notes = {};
+    saveState();
+    render();
+    closeResetModal();
+    showToast(i18n[state.lang].toastReset);
+  }
+
+  function exportCSV() {
+    const t = i18n[state.lang];
+    const dates = generateDates();
+    let csv = '\uFEFF' + [t.thNum, t.thDay, t.thDate, t.thStatus, t.thBonus, t.thNetDay, t.thCumulative, t.thNote].join(',') + '\n';
+    let running = 0;
+    let totalBase = 0;
+    let totalBonuses = 0;
+
+    dates.forEach((d, idx) => {
+      const num = idx + 1;
+      const key = formatDate(d);
+      const status = getDayStatus(key);
+      const done = status === 'worked';
+      const bonus = Math.max(0, Number(state.bonuses[key] || 0));
+      const baseDay = done ? DAILY_RATE : 0;
+      const dayTotal = baseDay + bonus;
+      totalBase += baseDay;
+      totalBonuses += bonus;
+      running += dayTotal;
+      const statusLabel = status === 'worked'
+        ? t.statusCsvWorked
+        : status === 'absent'
+          ? t.statusCsvAbsent
+          : t.statusCsvNone;
+      const row = [
+        num,
+        t.days[d.getDay()],
+        key,
+        statusLabel,
+        bonus,
+        dayTotal,
+        running,
+        `"${(state.notes[key] || '').replace(/"/g, '""')}"`
+      ];
+      csv += row.join(',') + '\n';
+    });
+
+    // Append Standalone General Deductions section
+    csv += '\n' + t.csvDedHeader + '\n';
+    csv += t.csvDedCols.join(',') + '\n';
+    let totalDed = 0;
+    state.generalDeductions.forEach(item => {
+      const amt = Math.max(0, Number(item.amount) || 0);
+      totalDed += amt;
+      csv += [item.date, `"${(item.reason || '').replace(/"/g, '""')}"`, amt].join(',') + '\n';
+    });
+
+    // Append Financial Summary
+    csv += '\n' + t.csvSummaryHeader + '\n';
+    csv += `${t.lblGross},${totalBase}\n`;
+    csv += `${t.lblBonuses},${totalBonuses}\n`;
+    csv += `${t.lblDeductions},${totalDed}\n`;
+    csv += `${t.lblNet},${(totalBase + totalBonuses) - totalDed}\n`;
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'work_goals_calendar_sept2027.csv';
+    a.click();
+    showToast(t.toastExport);
+  }
+
+  applyTheme();
+  render();
+</script>
+</body>
+</html>
